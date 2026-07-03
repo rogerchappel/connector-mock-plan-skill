@@ -32,7 +32,7 @@ export function analyzeText(text) {
   const fields = {};
   for (const [label, source, flags] of ROWS) {
     const match = text.match(new RegExp(source, flags));
-    fields[label] = match && match[1] ? clean(match[1]) : 'Not found';
+    fields[label] = match && match[1] ? clean(match[1]) : match ? 'Present' : 'Not found';
   }
   const warnings = WARNING_TERMS.filter((term) => text.toLowerCase().includes(term.toLowerCase()));
   return {
