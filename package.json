@@ -1,0 +1,25 @@
+{
+  "name": "connector-mock-plan-skill",
+  "version": "0.1.0",
+  "description": "Generate local mock plans from connector capability manifests.",
+  "type": "module",
+  "bin": {
+    "connector-mock-plan": "./bin/cli.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "check": "node scripts/check.js",
+    "smoke": "node bin/cli.js fixtures/connector-manifest.json"
+  },
+  "keywords": [
+    "agent-skill",
+    "agents",
+    "cli",
+    "dry-run"
+  ],
+  "author": "Roger Chappel",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  }
+}
