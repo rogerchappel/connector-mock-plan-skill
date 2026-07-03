@@ -1,0 +1,24 @@
+{
+  "connector": "example-crm",
+  "capabilities": [
+    {
+      "name": "search_contacts",
+      "sideEffect": false,
+      "permissions": [
+        "contacts:read"
+      ]
+    },
+    {
+      "name": "create_note",
+      "sideEffect": true,
+      "permissions": [
+        "notes:write"
+      ]
+    }
+  ],
+  "limits": [
+    "rate limit",
+    "empty result",
+    "permission denied"
+  ]
+}
