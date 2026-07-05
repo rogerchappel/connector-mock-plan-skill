@@ -9,7 +9,9 @@
   "scripts": {
     "test": "node --test",
     "check": "node scripts/check.js",
-    "smoke": "node bin/cli.js fixtures/connector-manifest.json"
+    "smoke": "node bin/cli.js fixtures/connector-manifest.json",
+    "package:smoke": "npm pack --dry-run",
+    "release:check": "npm run check && npm test && npm run smoke && npm run package:smoke"
   },
   "keywords": [
     "agent-skill",
