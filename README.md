@@ -26,6 +26,18 @@ node bin/cli.js fixtures/connector-manifest.json
 node bin/cli.js fixtures/connector-manifest.json --format=json
 ```
 
+## Release Verification
+
+Run the full release gate before opening a release-facing pull request:
+
+```bash
+npm run release:check
+```
+
+The release gate runs the static checker, Node test suite, fixture-backed CLI
+smoke, and `npm pack --dry-run` so the published package contents stay
+reviewable.
+
 ## Safety Notes
 
 - Reads local files only.
