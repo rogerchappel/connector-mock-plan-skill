@@ -25,6 +25,19 @@
     "url": "https://github.com/rogerchappel/connector-mock-plan-skill/issues"
   },
   "homepage": "https://github.com/rogerchappel/connector-mock-plan-skill#readme",
+  "files": [
+    "bin",
+    "src",
+    "scripts",
+    "fixtures",
+    "examples",
+    "docs",
+    "SKILL.md",
+    "README.md",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "LICENSE"
+  ],
   "author": "Roger Chappel",
   "license": "MIT",
   "engines": {
