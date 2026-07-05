@@ -9,13 +9,36 @@
   "scripts": {
     "test": "node --test",
     "check": "node scripts/check.js",
-    "smoke": "node bin/cli.js fixtures/connector-manifest.json"
+    "smoke": "node bin/cli.js fixtures/connector-manifest.json",
+    "package:smoke": "npm pack --dry-run",
+    "release:check": "npm run check && npm test && npm run smoke && npm run package:smoke"
   },
   "keywords": [
     "agent-skill",
     "agents",
     "cli",
     "dry-run"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rogerchappel/connector-mock-plan-skill.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rogerchappel/connector-mock-plan-skill/issues"
+  },
+  "homepage": "https://github.com/rogerchappel/connector-mock-plan-skill#readme",
+  "files": [
+    "bin",
+    "src",
+    "scripts",
+    "fixtures",
+    "examples",
+    "docs",
+    "SKILL.md",
+    "README.md",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "LICENSE"
   ],
   "author": "Roger Chappel",
   "license": "MIT",
