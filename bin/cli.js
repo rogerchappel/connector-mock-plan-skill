@@ -5,9 +5,14 @@ const args = process.argv.slice(2);
 const file = args.find((arg) => !arg.startsWith('--'));
 const format = args.includes('--format=json') || args.includes('--json') ? 'json' : 'markdown';
 
-if (!file || args.includes('--help')) {
+if (args.includes('--help')) {
   console.log('Usage: connector-mock-plan <file> [--format=json]');
-  process.exit(file ? 0 : 1);
+  process.exit(0);
+}
+
+if (!file) {
+  console.log('Usage: connector-mock-plan <file> [--format=json]');
+  process.exit(1);
 }
 
 try {
