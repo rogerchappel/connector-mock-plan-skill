@@ -50,3 +50,14 @@ reviewable.
 - V1 uses deterministic fixture parsing and conservative warning terms.
 - It is designed for small local plans and run notes, not full transcript warehouses.
 - Human review is still required before public reuse or external action.
+## Development checks
+
+Run the same local gates that CI runs before opening a PR:
+
+```bash
+npm run check --if-present
+npm run build --if-present
+npm test --if-present
+npm run smoke --if-present
+```
+
