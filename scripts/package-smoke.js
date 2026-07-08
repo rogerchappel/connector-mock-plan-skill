@@ -7,9 +7,12 @@ import packageJson from '../package.json' with { type: 'json' };
 const requiredFiles = [
   'README.md',
   'LICENSE',
+  'SECURITY.md',
   'CHANGELOG.md',
   'CONTRIBUTING.md',
-  'SKILL.md'
+  'SKILL.md',
+  'docs/RELEASE_CANDIDATE.md',
+  'examples/sample-output.md'
 ];
 
 for (const file of requiredFiles) {

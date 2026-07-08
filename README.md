@@ -36,7 +36,9 @@ npm run release:check
 
 The release gate runs the static checker, Node test suite, fixture-backed CLI
 smoke, and `npm pack --dry-run` so the published package contents stay
-reviewable.
+reviewable. The package smoke step also verifies the skill file, release
+candidate notes, sample output, contribution guide, security policy, changelog,
+license, and README are present in the publishable tarball.
 
 ## Safety Notes
 
@@ -60,4 +62,3 @@ npm run build --if-present
 npm test --if-present
 npm run smoke --if-present
 ```
-
