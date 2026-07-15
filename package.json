@@ -39,7 +39,8 @@
     "SECURITY.md",
     "CHANGELOG.md",
     "CONTRIBUTING.md",
-    "LICENSE"
+    "LICENSE",
+    "test"
   ],
   "author": "Roger Chappel",
   "license": "MIT",
