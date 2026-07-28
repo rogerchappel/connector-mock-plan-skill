@@ -32,8 +32,16 @@ The CLI plans local mocks only. It must not call real connectors, create account
 
 ```bash
 node bin/cli.js fixtures/connector-manifest.json
-node bin/cli.js fixtures/connector-manifest.json --format=json
+node bin/cli.js fixtures/connector-manifest.json --format json
 ```
+
+The output format is `markdown` (the default) or `json`. The compact
+`--format=json` form and `--json` shorthand are also valid. Treat an exit status
+of 2 as a CLI usage error and correct the option before retrying.
+
+JSON object manifests are analyzed structurally: warnings come from exact
+hazardous values in capabilities and effects, not descriptive prose. Markdown
+and plain text use a label- and word-boundary-based fallback.
 
 ## Validation
 

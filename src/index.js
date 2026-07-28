@@ -29,12 +29,39 @@ export function readInput(file) {
 }
 
 export function analyzeText(text) {
+  const manifest = parseManifest(text);
+  if (manifest) return analyzeManifest(manifest);
+
+  const fields = analyzeTextFields(text);
+  const warnings = WARNING_TERMS.filter((term) => {
+    const pattern = term === 'sideEffect' ? /\bsideEffect\b/i : new RegExp(`\\b${term}\\b`, 'i');
+    return pattern.test(text);
+  });
+  return buildResult(fields, warnings);
+}
+
+function analyzeManifest(manifest) {
+  const fields = {
+    Connector: scalarValue(manifest.connector),
+    Capabilities: summarizeCapabilities(manifest.capabilities),
+    Limits: manifest.limits === undefined ? 'Not found' : 'Present'
+  };
+  const warningSet = new Set();
+  collectHazards(manifest.capabilities, warningSet);
+  collectHazards(manifest.effects, warningSet);
+  return buildResult(fields, WARNING_TERMS.filter((term) => warningSet.has(term)));
+}
+
+function analyzeTextFields(text) {
   const fields = {};
   for (const [label, source, flags] of ROWS) {
     const match = text.match(new RegExp(source, flags));
     fields[label] = match && match[1] ? clean(match[1]) : match ? 'Present' : 'Not found';
   }
-  const warnings = WARNING_TERMS.filter((term) => text.toLowerCase().includes(term.toLowerCase()));
+  return fields;
+}
+
+function buildResult(fields, warnings) {
   return {
     title: 'Connector Mock Plan',
     fields,
@@ -46,6 +73,50 @@ export function analyzeText(text) {
       'Keep external side effects behind approval'
     ]
   };
+}
+
+function parseManifest(text) {
+  try {
+    const value = JSON.parse(text);
+    return value && typeof value === 'object' && !Array.isArray(value) ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+function collectHazards(value, warnings) {
+  if (Array.isArray(value)) {
+    for (const item of value) collectHazards(item, warnings);
+    return;
+  }
+  if (value && typeof value === 'object') {
+    for (const [key, item] of Object.entries(value)) {
+      if (key.toLowerCase() === 'sideeffect' && item === true) warnings.add('sideEffect');
+      collectHazards(item, warnings);
+    }
+    return;
+  }
+  if (typeof value !== 'string') return;
+
+  for (const token of value.split(/[:./\s_-]+/)) {
+    if (token.toLowerCase() === 'write') warnings.add('write');
+    if (token.toLowerCase() === 'delete') warnings.add('delete');
+    if (token.toLowerCase() === 'sideeffect') warnings.add('sideEffect');
+  }
+}
+
+function scalarValue(value) {
+  return typeof value === 'string' || typeof value === 'number' ? String(value) : 'Not found';
+}
+
+function summarizeCapabilities(value) {
+  if (!Array.isArray(value)) return value === undefined ? 'Not found' : 'Present';
+  const names = value.flatMap((item) => {
+    if (typeof item === 'string') return [item];
+    if (item && typeof item.name === 'string') return [item.name];
+    return [];
+  });
+  return names.length > 0 ? names.join(', ') : 'Present';
 }
 
 export function planConnectorMocks(file) {
