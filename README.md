@@ -28,14 +28,18 @@ npm pack --dry-run
 ## CLI
 
 ```bash
-connector-mock-plan <file> [--format=json]
+connector-mock-plan <file> [--format <markdown|json>]
 ```
+
+Markdown is the default. `--format=json` and the `--json` shorthand are also
+supported. Unknown options, missing option values, and unsupported formats
+produce an error and exit status 2.
 
 ## Examples
 
 ```bash
 node bin/cli.js fixtures/connector-manifest.json
-node bin/cli.js fixtures/connector-manifest.json --format=json
+node bin/cli.js fixtures/connector-manifest.json --format json
 ```
 
 ## Release Verification
@@ -59,9 +63,19 @@ license, and README are present in the publishable tarball.
 - Does not approve, publish, send, or write outside stdout.
 - Treat warnings as review prompts, not perfect policy enforcement.
 
+## Input handling
+
+- JSON object manifests are analyzed by structure. Connector, capability, and
+  limit findings come from their corresponding fields; warnings are limited to
+  exact hazardous capability/effect values such as `write`, `delete`, and
+  `sideEffect`, including scoped permission values such as `notes:write`.
+- Non-JSON Markdown and text remain supported through a deterministic fallback.
+  The fallback extracts known labels and matches warning terms on word
+  boundaries, so incidental substrings such as `overwrite` are not warnings.
+
 ## Limitations
 
-- V1 uses deterministic fixture parsing and conservative warning terms.
+- The text fallback does not infer document structure beyond known labels.
 - It is designed for small local plans and run notes, not full transcript warehouses.
 - Human review is still required before public reuse or external action.
 ## Development checks
