@@ -77,3 +77,23 @@ test('falls back to token-aware analysis for non-JSON text', () => {
   assert.deepEqual(analyzeText('This can overwrite cached data').warnings, []);
   assert.deepEqual(analyzeText('Capabilities: write').warnings, ['write']);
 });
+
+test('renders multiline JSON connector values on one Markdown finding line', () => {
+  const result = analyzeText(JSON.stringify({ connector: 'demo\r\nInjected line' }));
+
+  assert.equal(result.fields.Connector, 'demo\r\nInjected line');
+  assert.match(toMarkdown(result), /^- Connector: demo Injected line$/m);
+  assert.doesNotMatch(toMarkdown(result), /^Injected line$/m);
+});
+
+test('renders multiline capability and action names on one finding line', () => {
+  const result = analyzeText(JSON.stringify({
+    capabilities: ['contacts\nread', { name: 'reports\r\nexport' }],
+    actions: [{ name: 'notes\n- forged finding' }]
+  }));
+
+  const markdown = toMarkdown(result);
+  assert.match(markdown, /^- Capabilities: contacts read, reports export$/m);
+  assert.match(markdown, /^- Actions: notes - forged finding$/m);
+  assert.doesNotMatch(markdown, /^- forged finding$/m);
+});

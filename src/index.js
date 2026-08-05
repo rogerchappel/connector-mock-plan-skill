@@ -135,7 +135,7 @@ export function planConnectorMocks(file) {
 export function toMarkdown(result) {
   const lines = ['# ' + result.title, '', 'Risk: ' + result.risk, '', '## Findings'];
   for (const [key, value] of Object.entries(result.fields)) {
-    lines.push('- ' + key + ': ' + value);
+    lines.push('- ' + key + ': ' + singleLine(value));
   }
   lines.push('', '## Warnings');
   if (result.warnings.length === 0) {
@@ -146,6 +146,10 @@ export function toMarkdown(result) {
   lines.push('', '## Next Steps');
   for (const step of result.nextSteps) lines.push('- ' + step);
   return lines.join('\n') + '\n';
+}
+
+function singleLine(value) {
+  return String(value).replace(/\r\n|[\r\n]/g, ' ');
 }
 
 function clean(value) {
