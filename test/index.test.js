@@ -41,6 +41,38 @@ test('flags exact hazardous capability and effect values in JSON', () => {
   assert.equal(result.risk, 'high');
 });
 
+test('summarizes actions and flags hazardous action names and effects', () => {
+  const result = analyzeText(JSON.stringify({
+    connector: 'example',
+    actions: [
+      { name: 'contacts.delete', effect: 'delete' },
+      { name: 'notes.create', effect: 'write' },
+      { name: 'reports.export', sideEffect: true }
+    ]
+  }));
+
+  assert.equal(result.fields.Actions, 'contacts.delete, notes.create, reports.export');
+  assert.deepEqual(result.warnings, ['write', 'delete', 'sideEffect']);
+  assert.equal(result.risk, 'high');
+});
+
+test('does not flag hazardous prose or substrings inside actions', () => {
+  const result = analyzeText(JSON.stringify({
+    connector: 'example',
+    actions: [{
+      name: 'contacts.read',
+      effect: 'read',
+      description: 'Delete requests are rejected and writes are audited',
+      documentation: 'See the sideEffects guide',
+      metadata: { note: 'overwrite protection' }
+    }]
+  }));
+
+  assert.equal(result.fields.Actions, 'contacts.read');
+  assert.deepEqual(result.warnings, []);
+  assert.equal(result.risk, 'low');
+});
+
 test('falls back to token-aware analysis for non-JSON text', () => {
   assert.deepEqual(analyzeText('This can overwrite cached data').warnings, []);
   assert.deepEqual(analyzeText('Capabilities: write').warnings, ['write']);
