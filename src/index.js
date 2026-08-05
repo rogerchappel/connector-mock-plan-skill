@@ -12,6 +12,11 @@ const ROWS = [
     "i"
   ],
   [
+    "Actions",
+    "\"?actions\"?\\s*[:=]?",
+    "i"
+  ],
+  [
     "Limits",
     "\"?limits\"?\\s*[:=]?",
     "i"
@@ -43,12 +48,14 @@ export function analyzeText(text) {
 function analyzeManifest(manifest) {
   const fields = {
     Connector: scalarValue(manifest.connector),
-    Capabilities: summarizeCapabilities(manifest.capabilities),
+    Capabilities: summarizeNamedEntries(manifest.capabilities),
+    Actions: summarizeNamedEntries(manifest.actions),
     Limits: manifest.limits === undefined ? 'Not found' : 'Present'
   };
   const warningSet = new Set();
   collectHazards(manifest.capabilities, warningSet);
   collectHazards(manifest.effects, warningSet);
+  collectHazards(manifest.actions, warningSet);
   return buildResult(fields, WARNING_TERMS.filter((term) => warningSet.has(term)));
 }
 
@@ -92,7 +99,9 @@ function collectHazards(value, warnings) {
   if (value && typeof value === 'object') {
     for (const [key, item] of Object.entries(value)) {
       if (key.toLowerCase() === 'sideeffect' && item === true) warnings.add('sideEffect');
-      collectHazards(item, warnings);
+      if (['name', 'effect', 'permission', 'permissions'].includes(key.toLowerCase())) {
+        collectHazards(item, warnings);
+      }
     }
     return;
   }
@@ -109,7 +118,7 @@ function scalarValue(value) {
   return typeof value === 'string' || typeof value === 'number' ? String(value) : 'Not found';
 }
 
-function summarizeCapabilities(value) {
+function summarizeNamedEntries(value) {
   if (!Array.isArray(value)) return value === undefined ? 'Not found' : 'Present';
   const names = value.flatMap((item) => {
     if (typeof item === 'string') return [item];
