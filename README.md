@@ -65,10 +65,15 @@ license, and README are present in the publishable tarball.
 
 ## Input handling
 
-- JSON object manifests are analyzed by structure. Connector, capability, and
-  limit findings come from their corresponding fields; warnings are limited to
-  exact hazardous capability/effect values such as `write`, `delete`, and
-  `sideEffect`, including scoped permission values such as `notes:write`.
+- JSON object manifests are analyzed by structure. Connector, capability,
+  action, and limit findings come from their corresponding fields. Capability
+  and action arrays may contain strings or objects with `name` fields.
+- Warnings are limited to exact hazardous values in top-level `effects` and in
+  capability/action `name`, `effect`, `permission`, `permissions`, or boolean
+  `sideEffect` fields. Recognized values include `write`, `delete`, and
+  `sideEffect`, including scoped names and permissions such as `contacts.delete`
+  and `notes:write`. Descriptions, documentation, metadata, and incidental
+  substrings such as `overwrite` do not create warnings.
 - Non-JSON Markdown and text remain supported through a deterministic fallback.
   The fallback extracts known labels and matches warning terms on word
   boundaries, so incidental substrings such as `overwrite` are not warnings.
