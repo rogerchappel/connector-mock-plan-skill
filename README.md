@@ -35,6 +35,10 @@ Markdown is the default. `--format=json` and the `--json` shorthand are also
 supported. Unknown options, missing option values, and unsupported formats
 produce an error and exit status 2.
 
+Markdown findings always occupy one line per field. Line breaks in connector,
+capability, and action values are rendered as spaces; JSON output preserves the
+original string values.
+
 ## Examples
 
 ```bash
