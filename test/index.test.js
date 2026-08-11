@@ -34,7 +34,7 @@ test('flags exact hazardous capability and effect values in JSON', () => {
     connector: 'example',
     capabilities: ['read', 'write', 'delete'],
     effects: ['sideEffect'],
-    limits: {}
+    limits: { rate: 10 }
   }));
 
   assert.deepEqual(result.warnings, ['write', 'delete', 'sideEffect']);
@@ -48,7 +48,8 @@ test('summarizes actions and flags hazardous action names and effects', () => {
       { name: 'contacts.delete', effect: 'delete' },
       { name: 'notes.create', effect: 'write' },
       { name: 'reports.export', sideEffect: true }
-    ]
+    ],
+    limits: ['rate limit']
   }));
 
   assert.equal(result.fields.Actions, 'contacts.delete, notes.create, reports.export');
@@ -65,7 +66,8 @@ test('does not flag hazardous prose or substrings inside actions', () => {
       description: 'Delete requests are rejected and writes are audited',
       documentation: 'See the sideEffects guide',
       metadata: { note: 'overwrite protection' }
-    }]
+    }],
+    limits: ['rate limit']
   }));
 
   assert.equal(result.fields.Actions, 'contacts.read');
@@ -76,6 +78,43 @@ test('does not flag hazardous prose or substrings inside actions', () => {
 test('falls back to token-aware analysis for non-JSON text', () => {
   assert.deepEqual(analyzeText('This can overwrite cached data').warnings, []);
   assert.deepEqual(analyzeText('Capabilities: write').warnings, ['write']);
+});
+
+test('does not assign low risk to an empty JSON manifest', () => {
+  const result = analyzeText('{}');
+
+  assert.deepEqual(result.warnings, [
+    'missing connector',
+    'missing capabilities or actions',
+    'missing limits'
+  ]);
+  assert.equal(result.risk, 'high');
+  assert.match(toMarkdown(result), /Incomplete manifest: missing connector/);
+});
+
+test('reports each missing source of required JSON planning evidence', () => {
+  const missingConnector = analyzeText(JSON.stringify({ capabilities: ['read'], limits: ['rate limit'] }));
+  assert.deepEqual(missingConnector.warnings, ['missing connector']);
+  assert.equal(missingConnector.risk, 'review');
+
+  const missingOperations = analyzeText(JSON.stringify({ connector: 'example', limits: ['rate limit'] }));
+  assert.deepEqual(missingOperations.warnings, ['missing capabilities or actions']);
+
+  const missingLimits = analyzeText(JSON.stringify({ connector: 'example', actions: ['read'] }));
+  assert.deepEqual(missingLimits.warnings, ['missing limits']);
+});
+
+test('treats empty JSON values as incomplete and accepts actions as operation evidence', () => {
+  const incomplete = analyzeText(JSON.stringify({ connector: ' ', capabilities: [], actions: [], limits: {} }));
+  assert.deepEqual(incomplete.warnings, [
+    'missing connector',
+    'missing capabilities or actions',
+    'missing limits'
+  ]);
+
+  const complete = analyzeText(JSON.stringify({ connector: 'example', actions: ['read'], limits: { rate: 10 } }));
+  assert.deepEqual(complete.warnings, []);
+  assert.equal(complete.risk, 'low');
 });
 
 test('renders multiline JSON connector values on one Markdown finding line', () => {

@@ -43,6 +43,11 @@ JSON object manifests are analyzed structurally: warnings come from exact
 hazardous values in capabilities and effects, not descriptive prose. Markdown
 and plain text use a label- and word-boundary-based fallback.
 
+Before using generated output, confirm that JSON manifests name a connector,
+provide at least one capability or action, and describe non-empty limits. Empty
+or missing evidence appears in JSON `warnings` and as `Incomplete manifest`
+items in Markdown; such a result is not an unqualified low-risk plan.
+
 ## Validation
 
 - `npm test`
