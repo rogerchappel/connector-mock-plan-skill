@@ -28,6 +28,11 @@ const WARNING_TERMS = [
   "sideEffect",
   "permission denied"
 ];
+const COMPLETENESS_WARNINGS = {
+  connector: 'missing connector',
+  operations: 'missing capabilities or actions',
+  limits: 'missing limits'
+};
 
 export function readInput(file) {
   return fs.readFileSync(file, 'utf8');
@@ -56,7 +61,13 @@ function analyzeManifest(manifest) {
   collectHazards(manifest.capabilities, warningSet);
   collectHazards(manifest.effects, warningSet);
   collectHazards(manifest.actions, warningSet);
-  return buildResult(fields, WARNING_TERMS.filter((term) => warningSet.has(term)));
+  const warnings = WARNING_TERMS.filter((term) => warningSet.has(term));
+  if (!hasScalarValue(manifest.connector)) warnings.push(COMPLETENESS_WARNINGS.connector);
+  if (!hasNamedEntries(manifest.capabilities) && !hasNamedEntries(manifest.actions)) {
+    warnings.push(COMPLETENESS_WARNINGS.operations);
+  }
+  if (!hasMaterialValue(manifest.limits)) warnings.push(COMPLETENESS_WARNINGS.limits);
+  return buildResult(fields, warnings);
 }
 
 function analyzeTextFields(text) {
@@ -118,6 +129,26 @@ function scalarValue(value) {
   return typeof value === 'string' || typeof value === 'number' ? String(value) : 'Not found';
 }
 
+function hasScalarValue(value) {
+  return (typeof value === 'string' && value.trim().length > 0) || typeof value === 'number';
+}
+
+function hasNamedEntries(value) {
+  if (!Array.isArray(value)) return hasMaterialValue(value);
+  return value.some((item) => {
+    if (typeof item === 'string') return item.trim().length > 0;
+    return item && typeof item.name === 'string' && item.name.trim().length > 0;
+  });
+}
+
+function hasMaterialValue(value) {
+  if (value === undefined || value === null) return false;
+  if (typeof value === 'string') return value.trim().length > 0;
+  if (Array.isArray(value)) return value.length > 0;
+  if (typeof value === 'object') return Object.keys(value).length > 0;
+  return true;
+}
+
 function summarizeNamedEntries(value) {
   if (!Array.isArray(value)) return value === undefined ? 'Not found' : 'Present';
   const names = value.flatMap((item) => {
@@ -141,7 +172,10 @@ export function toMarkdown(result) {
   if (result.warnings.length === 0) {
     lines.push('- None');
   } else {
-    for (const warning of result.warnings) lines.push('- Review term: ' + warning);
+    for (const warning of result.warnings) {
+      const label = Object.values(COMPLETENESS_WARNINGS).includes(warning) ? 'Incomplete manifest: ' : 'Review term: ';
+      lines.push('- ' + label + warning);
+    }
   }
   lines.push('', '## Next Steps');
   for (const step of result.nextSteps) lines.push('- ' + step);
