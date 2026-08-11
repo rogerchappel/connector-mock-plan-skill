@@ -72,6 +72,11 @@ license, and README are present in the publishable tarball.
 - JSON object manifests are analyzed by structure. Connector, capability,
   action, and limit findings come from their corresponding fields. Capability
   and action arrays may contain strings or objects with `name` fields.
+- A complete JSON plan has a non-empty connector, at least one named capability
+  or action, and non-empty limits. Missing or empty required evidence (including
+  an empty object manifest) produces explicit completeness warnings and cannot
+  receive an unqualified `low` risk. JSON output exposes these messages in
+  `warnings`; Markdown labels them `Incomplete manifest`.
 - Warnings are limited to exact hazardous values in top-level `effects` and in
   capability/action `name`, `effect`, `permission`, `permissions`, or boolean
   `sideEffect` fields. Recognized values include `write`, `delete`, and
