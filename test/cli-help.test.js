@@ -61,3 +61,24 @@ test('CLI marks an empty JSON manifest as incomplete in JSON and Markdown output
   assert.match(markdown.stdout, /Risk: high/);
   assert.match(markdown.stdout, /Incomplete manifest: missing limits/);
 });
+
+test('CLI rejects malformed JSON-shaped input without emitting a plan', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'connector-mock-plan-'));
+  const fixture = join(directory, 'truncated.json');
+  writeFileSync(fixture, '{"connector":"github","limits":');
+
+  const result = run(fixture, '--json');
+  assert.equal(result.status, 1);
+  assert.equal(result.stdout, '');
+  assert.match(result.stderr, /^connector-mock-plan: invalid JSON manifest\n$/);
+});
+
+test('CLI retains plain-text fallback', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'connector-mock-plan-'));
+  const fixture = join(directory, 'notes.txt');
+  writeFileSync(fixture, 'Connector: github\nCapabilities: read\nLimits: local only\n');
+
+  const result = run(fixture, '--json');
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(JSON.parse(result.stdout).fields.Connector, 'github');
+});

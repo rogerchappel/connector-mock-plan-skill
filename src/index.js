@@ -98,6 +98,7 @@ function parseManifest(text) {
     const value = JSON.parse(text);
     return value && typeof value === 'object' && !Array.isArray(value) ? value : null;
   } catch {
+    if (/^\s*[\[{]/.test(text)) throw new SyntaxError('invalid JSON manifest');
     return null;
   }
 }
@@ -117,6 +118,8 @@ function collectHazards(value, warnings) {
     return;
   }
   if (typeof value !== 'string') return;
+
+  if (value.toLowerCase() === 'permission denied') warnings.add('permission denied');
 
   for (const token of value.split(/[:./\s_-]+/)) {
     if (token.toLowerCase() === 'write') warnings.add('write');

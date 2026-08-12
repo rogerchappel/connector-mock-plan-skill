@@ -80,6 +80,30 @@ test('falls back to token-aware analysis for non-JSON text', () => {
   assert.deepEqual(analyzeText('Capabilities: write').warnings, ['write']);
 });
 
+test('rejects malformed JSON-shaped input but accepts plain text', () => {
+  assert.throws(
+    () => analyzeText('{"connector":"github","limits":'),
+    { name: 'SyntaxError', message: 'invalid JSON manifest' }
+  );
+  assert.equal(analyzeText('Connector: github\nCapabilities: read').fields.Connector, 'github');
+});
+
+test('flags exact permission denied values without matching near-miss prose', () => {
+  const denied = analyzeText(JSON.stringify({
+    connector: 'example',
+    capabilities: [{ name: 'records.read', permission: 'permission denied' }],
+    limits: { rate: 10 }
+  }));
+  assert.deepEqual(denied.warnings, ['permission denied']);
+
+  const prose = analyzeText(JSON.stringify({
+    connector: 'example',
+    capabilities: [{ name: 'records.read', permission: 'handle permission denied errors' }],
+    limits: { rate: 10 }
+  }));
+  assert.deepEqual(prose.warnings, []);
+});
+
 test('does not assign low risk to an empty JSON manifest', () => {
   const result = analyzeText('{}');
 
