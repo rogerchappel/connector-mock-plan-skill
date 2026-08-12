@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Reject malformed JSON-shaped manifests while preserving plain-text input,
+  and recognize exact structured `permission denied` review values.
 - Warn when JSON manifests omit connector, capability/action, or limit evidence.
 - Analyze JSON manifests structurally and avoid warnings from incidental prose.
 - Analyze action-shaped manifest entries for hazardous names, effects,
