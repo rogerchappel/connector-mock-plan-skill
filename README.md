@@ -72,6 +72,10 @@ license, and README are present in the publishable tarball.
 - JSON object manifests are analyzed by structure. Connector, capability,
   action, and limit findings come from their corresponding fields. Capability
   and action arrays may contain strings or objects with `name` fields.
+- Input whose first non-whitespace character is `{` or `[` is treated as
+  JSON-shaped. If it is malformed, the library throws `invalid JSON manifest`
+  and the CLI writes that concise diagnostic to stderr, exits nonzero, and
+  emits no plan. Other input retains the plain-text fallback described below.
 - A complete JSON plan has a non-empty connector, at least one named capability
   or action, and non-empty limits. Missing or empty required evidence (including
   an empty object manifest) produces explicit completeness warnings and cannot
@@ -81,8 +85,11 @@ license, and README are present in the publishable tarball.
   capability/action `name`, `effect`, `permission`, `permissions`, or boolean
   `sideEffect` fields. Recognized values include `write`, `delete`, and
   `sideEffect`, including scoped names and permissions such as `contacts.delete`
-  and `notes:write`. Descriptions, documentation, metadata, and incidental
-  substrings such as `overwrite` do not create warnings.
+  and `notes:write`. The multi-word value `permission denied` is recognized
+  only when it is the complete structured value; prose such as `handle
+  permission denied errors` is not a match. Descriptions, documentation,
+  metadata, and incidental substrings such as `overwrite` do not create
+  warnings.
 - Non-JSON Markdown and text remain supported through a deterministic fallback.
   The fallback extracts known labels and matches warning terms on word
   boundaries, so incidental substrings such as `overwrite` are not warnings.
