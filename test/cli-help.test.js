@@ -82,3 +82,27 @@ test('CLI retains plain-text fallback', () => {
   assert.equal(result.status, 0, result.stderr);
   assert.equal(JSON.parse(result.stdout).fields.Connector, 'github');
 });
+
+test('CLI rejects valid JSON whose top-level value is not an object', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'connector-mock-plan-'));
+
+  for (const [name, input] of [
+    ['array', '[]'],
+    ['string', '"connector"'],
+    ['number', '42'],
+    ['boolean', 'true'],
+    ['null', 'null']
+  ]) {
+    const fixture = join(directory, `${name}.json`);
+    writeFileSync(fixture, input);
+
+    const result = run(fixture, '--json');
+    assert.equal(result.status, 1, `${name}: ${result.stderr}`);
+    assert.equal(result.stdout, '', name);
+    assert.match(
+      result.stderr,
+      /^connector-mock-plan: JSON manifest must have an object as its top-level value\n$/,
+      name
+    );
+  }
+});

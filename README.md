@@ -71,7 +71,9 @@ license, and README are present in the publishable tarball.
 
 - JSON object manifests are analyzed by structure. Connector, capability,
   action, and limit findings come from their corresponding fields. Capability
-  and action arrays may contain strings or objects with `name` fields.
+  and action arrays may contain strings or objects with `name` fields. The JSON
+  top-level value must be an object; arrays, strings, numbers, booleans, and
+  `null` are rejected with a manifest-shape error and a nonzero exit status.
 - Input whose first non-whitespace character is `{` or `[` is treated as
   JSON-shaped. If it is malformed, the library throws `invalid JSON manifest`
   and the CLI writes that concise diagnostic to stderr, exits nonzero, and
