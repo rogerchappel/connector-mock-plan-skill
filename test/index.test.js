@@ -160,3 +160,12 @@ test('renders multiline capability and action names on one finding line', () => 
   assert.match(markdown, /^- Actions: notes - forged finding$/m);
   assert.doesNotMatch(markdown, /^- forged finding$/m);
 });
+
+test('valid JSON requires an object at the top level', () => {
+  for (const input of ['[]', '"connector"', '42', 'true', 'null']) {
+    assert.throws(
+      () => analyzeText(input),
+      { name: 'TypeError', message: 'JSON manifest must have an object as its top-level value' }
+    );
+  }
+});
