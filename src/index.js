@@ -94,13 +94,17 @@ function buildResult(fields, warnings) {
 }
 
 function parseManifest(text) {
+  let value;
   try {
-    const value = JSON.parse(text);
-    return value && typeof value === 'object' && !Array.isArray(value) ? value : null;
+    value = JSON.parse(text);
   } catch {
     if (/^\s*[\[{]/.test(text)) throw new SyntaxError('invalid JSON manifest');
     return null;
   }
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new TypeError('JSON manifest must have an object as its top-level value');
+  }
+  return value;
 }
 
 function collectHazards(value, warnings) {
