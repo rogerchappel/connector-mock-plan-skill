@@ -2,7 +2,7 @@
 import { planConnectorMocks, toMarkdown } from '../src/index.js';
 
 const args = process.argv.slice(2);
-const usage = 'Usage: connector-mock-plan <file> [--format <markdown|json>]';
+const usage = 'Usage: connector-mock-plan <file> [--format <markdown|json> | --json]';
 
 if (args.length === 1 && args[0] === '--help') {
   console.log(usage);
