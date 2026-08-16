@@ -28,12 +28,16 @@ npm pack --dry-run
 ## CLI
 
 ```bash
-connector-mock-plan <file> [--format <markdown|json>]
+connector-mock-plan <file> [--format <markdown|json> | --json]
 ```
 
 Markdown is the default. `--format=json` and the `--json` shorthand are also
-supported. Unknown options, missing option values, and unsupported formats
-produce an error and exit status 2.
+supported. Specify at most one output format selector: repeated `--format`
+options and any combination of `--json` with `--format` are errors, even when
+they request the same format. `--help` succeeds only when used by itself.
+Combining it with a file or another option is an error. These invalid
+combinations, unknown options, missing option values, and unsupported formats
+produce a diagnostic and exit status 2.
 
 Markdown findings always occupy one line per field. Line breaks in connector,
 capability, and action values are rendered as spaces; JSON output preserves the

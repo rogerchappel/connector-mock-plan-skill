@@ -11,6 +11,19 @@ test('CLI help entrypoint prints usage', () => {
   assert.match(result.stdout + result.stderr, /Usage:/);
 });
 
+test('CLI rejects help combined with other arguments', () => {
+  for (const args of [
+    ['--help', '--bogus'],
+    ['--bogus', '--help'],
+    ['--help', 'fixtures/connector-manifest.json'],
+    ['fixtures/connector-manifest.json', '--help']
+  ]) {
+    const result = run(...args);
+    assert.equal(result.status, 2, args.join(' '));
+    assert.match(result.stderr, /--help cannot be combined with other arguments/);
+  }
+});
+
 function run(...args) {
   return spawnSync(process.execPath, ['./bin/cli.js', ...args], { encoding: 'utf8' });
 }
@@ -39,6 +52,19 @@ test('CLI rejects unsupported formats and missing format values', () => {
   const missing = run('fixtures/connector-manifest.json', '--format');
   assert.equal(missing.status, 2);
   assert.match(missing.stderr, /--format requires a value/);
+});
+
+test('CLI rejects repeated or conflicting output format selectors', () => {
+  for (const args of [
+    ['fixtures/connector-manifest.json', '--format', 'json', '--format', 'json'],
+    ['fixtures/connector-manifest.json', '--format=json', '--format=markdown'],
+    ['fixtures/connector-manifest.json', '--json', '--format', 'markdown'],
+    ['fixtures/connector-manifest.json', '--format', 'markdown', '--json']
+  ]) {
+    const result = run(...args);
+    assert.equal(result.status, 2, args.join(' '));
+    assert.match(result.stderr, /output format may be specified only once/);
+  }
 });
 
 test('CLI marks an empty JSON manifest as incomplete in JSON and Markdown output', () => {

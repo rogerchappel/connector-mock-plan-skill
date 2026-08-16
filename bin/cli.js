@@ -2,9 +2,9 @@
 import { planConnectorMocks, toMarkdown } from '../src/index.js';
 
 const args = process.argv.slice(2);
-const usage = 'Usage: connector-mock-plan <file> [--format <markdown|json>]';
+const usage = 'Usage: connector-mock-plan <file> [--format <markdown|json> | --json]';
 
-if (args.includes('--help')) {
+if (args.length === 1 && args[0] === '--help') {
   console.log(usage);
   process.exit(0);
 }
@@ -27,22 +27,33 @@ try {
 }
 
 function parseArgs(input) {
+  if (input.includes('--help')) {
+    throw new Error('--help cannot be combined with other arguments');
+  }
+
   let file;
   let format = 'markdown';
+  let hasFormatSelector = false;
+
+  function selectFormat(value) {
+    if (hasFormatSelector) throw new Error('output format may be specified only once');
+    hasFormatSelector = true;
+    format = value;
+  }
 
   for (let index = 0; index < input.length; index += 1) {
     const arg = input[index];
     if (arg === '--json') {
-      format = 'json';
+      selectFormat('json');
     } else if (arg === '--format') {
       const value = input[index + 1];
       if (!value || value.startsWith('--')) throw new Error('--format requires a value');
-      format = value;
+      selectFormat(value);
       index += 1;
     } else if (arg.startsWith('--format=')) {
       const value = arg.slice('--format='.length);
       if (!value) throw new Error('--format requires a value');
-      format = value;
+      selectFormat(value);
     } else if (arg.startsWith('--')) {
       throw new Error('unknown option: ' + arg);
     } else if (file) {
