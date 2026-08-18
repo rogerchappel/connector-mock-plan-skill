@@ -141,6 +141,47 @@ test('treats empty JSON values as incomplete and accepts actions as operation ev
   assert.equal(complete.risk, 'low');
 });
 
+test('renders invalid structured fields as not found when completeness warnings are emitted', () => {
+  for (const manifest of [
+    { connector: 'example', capabilities: [], actions: [], limits: false },
+    { connector: 'example', capabilities: [42, {}, { name: ' ' }], limits: [] }
+  ]) {
+    const result = analyzeText(JSON.stringify(manifest));
+
+    assert.equal(result.fields.Capabilities, 'Not found');
+    assert.equal(result.fields.Actions, 'Not found');
+    assert.equal(result.fields.Limits, 'Not found');
+    assert.deepEqual(result.warnings, [
+      'missing capabilities or actions',
+      'missing limits'
+    ]);
+  }
+});
+
+test('retains summaries for valid structured operation and limit values', () => {
+  const arrays = analyzeText(JSON.stringify({
+    connector: 'example',
+    capabilities: ['records.read', { name: 'records.write' }],
+    actions: [{ name: 'reports.export' }],
+    limits: [{ rate: 10 }]
+  }));
+  assert.deepEqual(arrays.fields, {
+    Connector: 'example',
+    Capabilities: 'records.read, records.write',
+    Actions: 'reports.export',
+    Limits: 'Present'
+  });
+
+  const objects = analyzeText(JSON.stringify({
+    connector: 'example',
+    capabilities: { read: true },
+    limits: { rate: 10 }
+  }));
+  assert.equal(objects.fields.Capabilities, 'Present');
+  assert.equal(objects.fields.Limits, 'Present');
+  assert.deepEqual(objects.warnings, []);
+});
+
 test('renders multiline JSON connector values on one Markdown finding line', () => {
   const result = analyzeText(JSON.stringify({ connector: 'demo\r\nInjected line' }));
 
