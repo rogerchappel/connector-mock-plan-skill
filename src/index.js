@@ -55,7 +55,7 @@ function analyzeManifest(manifest) {
     Connector: scalarValue(manifest.connector),
     Capabilities: summarizeNamedEntries(manifest.capabilities),
     Actions: summarizeNamedEntries(manifest.actions),
-    Limits: manifest.limits === undefined ? 'Not found' : 'Present'
+    Limits: hasMaterialValue(manifest.limits) ? 'Present' : 'Not found'
   };
   const warningSet = new Set();
   collectHazards(manifest.capabilities, warningSet);
@@ -151,19 +151,20 @@ function hasNamedEntries(value) {
 function hasMaterialValue(value) {
   if (value === undefined || value === null) return false;
   if (typeof value === 'string') return value.trim().length > 0;
-  if (Array.isArray(value)) return value.length > 0;
+  if (typeof value === 'number') return Number.isFinite(value);
+  if (Array.isArray(value)) return value.some(hasMaterialValue);
   if (typeof value === 'object') return Object.keys(value).length > 0;
-  return true;
+  return false;
 }
 
 function summarizeNamedEntries(value) {
-  if (!Array.isArray(value)) return value === undefined ? 'Not found' : 'Present';
+  if (!Array.isArray(value)) return hasMaterialValue(value) ? 'Present' : 'Not found';
   const names = value.flatMap((item) => {
-    if (typeof item === 'string') return [item];
-    if (item && typeof item.name === 'string') return [item.name];
+    if (typeof item === 'string' && item.trim()) return [item.trim()];
+    if (item && typeof item.name === 'string' && item.name.trim()) return [item.name.trim()];
     return [];
   });
-  return names.length > 0 ? names.join(', ') : 'Present';
+  return names.length > 0 ? names.join(', ') : 'Not found';
 }
 
 export function planConnectorMocks(file) {
