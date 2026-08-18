@@ -75,9 +75,14 @@ license, and README are present in the publishable tarball.
 
 - JSON object manifests are analyzed by structure. Connector, capability,
   action, and limit findings come from their corresponding fields. Capability
-  and action arrays may contain strings or objects with `name` fields. The JSON
-  top-level value must be an object; arrays, strings, numbers, booleans, and
-  `null` are rejected with a manifest-shape error and a nonzero exit status.
+  and action arrays may contain non-empty strings or objects with non-empty
+  `name` fields; other array members do not count as named operation evidence.
+  Non-empty capability or action objects are also accepted. Limits must be a
+  non-empty string, finite number, non-empty object, or an array containing at
+  least one such value. Empty values and booleans, including `false`, are not
+  valid structured evidence and render as `Not found`. The JSON top-level value
+  must be an object; arrays, strings, numbers, booleans, and `null` are rejected
+  with a manifest-shape error and a nonzero exit status.
 - Input whose first non-whitespace character is `{` or `[` is treated as
   JSON-shaped. If it is malformed, the library throws `invalid JSON manifest`
   and the CLI writes that concise diagnostic to stderr, exits nonzero, and
@@ -86,7 +91,8 @@ license, and README are present in the publishable tarball.
   or action, and non-empty limits. Missing or empty required evidence (including
   an empty object manifest) produces explicit completeness warnings and cannot
   receive an unqualified `low` risk. JSON output exposes these messages in
-  `warnings`; Markdown labels them `Incomplete manifest`.
+  `warnings`; Markdown labels them `Incomplete manifest`. A finding is shown as
+  `Present` only when the same value satisfies these completeness rules.
 - Warnings are limited to exact hazardous values in top-level `effects` and in
   capability/action `name`, `effect`, `permission`, `permissions`, or boolean
   `sideEffect` fields. Recognized values include `write`, `delete`, and
