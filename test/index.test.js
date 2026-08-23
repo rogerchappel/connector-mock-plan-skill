@@ -141,6 +141,26 @@ test('treats empty JSON values as incomplete and accepts actions as operation ev
   assert.equal(complete.risk, 'low');
 });
 
+test('renders empty connector strings with the same validity used by completeness checks', () => {
+  for (const connector of ['', '   \t\n']) {
+    const result = analyzeText(JSON.stringify({ connector, capabilities: ['read'], limits: 10 }));
+
+    assert.equal(result.fields.Connector, 'Not found');
+    assert.deepEqual(result.warnings, ['missing connector']);
+    assert.equal(result.risk, 'review');
+    assert.match(toMarkdown(result), /^- Connector: Not found$/m);
+  }
+});
+
+test('retains valid string and numeric connector findings', () => {
+  for (const [connector, expected] of [['example', 'example'], [0, '0'], [42, '42']]) {
+    const result = analyzeText(JSON.stringify({ connector, capabilities: ['read'], limits: 10 }));
+
+    assert.equal(result.fields.Connector, expected);
+    assert.doesNotMatch(result.warnings.join('\n'), /missing connector/);
+  }
+});
+
 test('renders invalid structured fields as not found when completeness warnings are emitted', () => {
   for (const manifest of [
     { connector: 'example', capabilities: [], actions: [], limits: false },

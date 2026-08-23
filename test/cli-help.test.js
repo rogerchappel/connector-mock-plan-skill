@@ -118,6 +118,27 @@ test('CLI aligns invalid structured findings and warnings in JSON and Markdown',
   assert.match(markdown.stdout, /Incomplete manifest: missing limits/);
 });
 
+test('CLI renders empty connector strings as not found in JSON and Markdown', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'connector-mock-plan-'));
+
+  for (const [name, connector] of [['empty', ''], ['whitespace', '  \t\n']]) {
+    const fixture = join(directory, `${name}-connector.json`);
+    writeFileSync(fixture, JSON.stringify({ connector, capabilities: ['read'], limits: 10 }));
+
+    const json = run(fixture, '--json');
+    assert.equal(json.status, 0, json.stderr);
+    const result = JSON.parse(json.stdout);
+    assert.equal(result.fields.Connector, 'Not found');
+    assert.deepEqual(result.warnings, ['missing connector']);
+    assert.notEqual(result.risk, 'low');
+
+    const markdown = run(fixture);
+    assert.equal(markdown.status, 0, markdown.stderr);
+    assert.match(markdown.stdout, /^- Connector: Not found$/m);
+    assert.match(markdown.stdout, /Incomplete manifest: missing connector/);
+  }
+});
+
 test('CLI rejects malformed JSON-shaped input without emitting a plan', () => {
   const directory = mkdtempSync(join(tmpdir(), 'connector-mock-plan-'));
   const fixture = join(directory, 'truncated.json');
