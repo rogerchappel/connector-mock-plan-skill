@@ -133,7 +133,7 @@ function collectHazards(value, warnings) {
 }
 
 function scalarValue(value) {
-  return typeof value === 'string' || typeof value === 'number' ? String(value) : 'Not found';
+  return hasScalarValue(value) ? String(value) : 'Not found';
 }
 
 function hasScalarValue(value) {
