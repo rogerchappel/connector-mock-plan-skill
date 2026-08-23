@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Render empty and whitespace-only structured connector values as `Not found`,
+  matching completeness warnings in JSON and Markdown output.
 - Reject malformed JSON-shaped manifests while preserving plain-text input,
   and recognize exact structured `permission denied` review values.
 - Warn when JSON manifests omit connector, capability/action, or limit evidence.

@@ -87,8 +87,10 @@ license, and README are present in the publishable tarball.
   JSON-shaped. If it is malformed, the library throws `invalid JSON manifest`
   and the CLI writes that concise diagnostic to stderr, exits nonzero, and
   emits no plan. Other input retains the plain-text fallback described below.
-- A complete JSON plan has a non-empty connector, at least one named capability
-  or action, and non-empty limits. Missing or empty required evidence (including
+- A complete JSON plan has a non-empty connector (strings containing only
+  whitespace render as `Not found`; finite numeric connectors remain valid), at
+  least one named capability or action, and non-empty limits. Missing or empty
+  required evidence (including
   an empty object manifest) produces explicit completeness warnings and cannot
   receive an unqualified `low` risk. JSON output exposes these messages in
   `warnings`; Markdown labels them `Incomplete manifest`. A finding is shown as
