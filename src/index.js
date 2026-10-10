@@ -191,7 +191,10 @@ export function toMarkdown(result) {
 }
 
 function singleLine(value) {
-  return String(value).replace(/\r\n|[\r\n]/g, ' ');
+  return String(value)
+    .replace(/\\/g, '\\\\')
+    .replace(/\r\n|[\r\n]/g, ' ')
+    .replace(/[|`]/g, '\\$&');
 }
 
 function clean(value) {

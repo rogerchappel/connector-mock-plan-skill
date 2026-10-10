@@ -222,6 +222,20 @@ test('renders multiline capability and action names on one finding line', () => 
   assert.doesNotMatch(markdown, /^- forged finding$/m);
 });
 
+test('escapes Markdown table and code delimiters in finding values', () => {
+  const result = analyzeText(JSON.stringify({
+    connector: 'acme|`admin`',
+    capabilities: ['records|write`all`'],
+    actions: [{ name: 'notes|delete`all`' }],
+    limits: { rate: 10 }
+  }));
+
+  const markdown = toMarkdown(result);
+  assert.ok(markdown.split('\n').includes(String.raw`- Connector: acme\|\`admin\``));
+  assert.ok(markdown.split('\n').includes(String.raw`- Capabilities: records\|write\`all\``));
+  assert.ok(markdown.split('\n').includes(String.raw`- Actions: notes\|delete\`all\``));
+});
+
 test('valid JSON requires an object at the top level', () => {
   for (const input of ['[]', '"connector"', '42', 'true', 'null']) {
     assert.throws(
