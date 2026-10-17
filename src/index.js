@@ -141,7 +141,7 @@ function hasScalarValue(value) {
 }
 
 function hasNamedEntries(value) {
-  if (!Array.isArray(value)) return hasMaterialValue(value);
+  if (!Array.isArray(value)) return false;
   return value.some((item) => {
     if (typeof item === 'string') return item.trim().length > 0;
     return item && typeof item.name === 'string' && item.name.trim().length > 0;
@@ -158,7 +158,7 @@ function hasMaterialValue(value) {
 }
 
 function summarizeNamedEntries(value) {
-  if (!Array.isArray(value)) return hasMaterialValue(value) ? 'Present' : 'Not found';
+  if (!Array.isArray(value)) return 'Not found';
   const names = value.flatMap((item) => {
     if (typeof item === 'string' && item.trim()) return [item.trim()];
     if (item && typeof item.name === 'string' && item.name.trim()) return [item.name.trim()];
