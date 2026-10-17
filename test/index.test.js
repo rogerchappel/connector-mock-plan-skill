@@ -195,11 +195,13 @@ test('retains summaries for valid structured operation and limit values', () => 
   const objects = analyzeText(JSON.stringify({
     connector: 'example',
     capabilities: { read: true },
+    actions: { name: 'reports.export' },
     limits: { rate: 10 }
   }));
-  assert.equal(objects.fields.Capabilities, 'Present');
+  assert.equal(objects.fields.Capabilities, 'Not found');
+  assert.equal(objects.fields.Actions, 'Not found');
   assert.equal(objects.fields.Limits, 'Present');
-  assert.deepEqual(objects.warnings, []);
+  assert.deepEqual(objects.warnings, ['missing capabilities or actions']);
 });
 
 test('renders multiline JSON connector values on one Markdown finding line', () => {
